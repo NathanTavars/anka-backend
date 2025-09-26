@@ -8,13 +8,13 @@ datasource db {
 }
 
 model Simulation {
-  id        String       @id @default(cuid())
+  id        String   @id @default(uuid())
   name      String
   startDate DateTime
-  realRate  Float        @default(0.04)
-  status    String       @default("ALIVE")
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  realRate  Float
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   allocations Allocation[]
   movements   Movement[]
@@ -22,45 +22,44 @@ model Simulation {
 }
 
 model Allocation {
-  id           String     @id @default(cuid())
-  type         String     // FINANCIAL ou REAL_ESTATE
+  id           String   @id @default(uuid())
+  type         String
   name         String
   value        Float
   date         DateTime
-  financing    Financing? // Dados extras se for imobilizado financiado
   simulationId String
   simulation   Simulation @relation(fields: [simulationId], references: [id])
+  financing    Financing?
 }
 
 model Financing {
-  id           String   @id @default(cuid())
+  id           String   @id @default(uuid())
+  allocationId String   @unique
+  allocation   Allocation @relation(fields: [allocationId], references: [id])
   startDate    DateTime
   installments Int
   interestRate Float
-  entryValue   Float
-  allocation   Allocation @relation(fields: [allocationId], references: [id])
-  allocationId String     @unique
+  downPayment  Float
 }
 
-model Movement {
-  id           String     @id @default(cuid())
-  type         String     // INCOME ou EXPENSE
+model Insurance {
+  id           String   @id @default(uuid())
   name         String
-  value        Float
-  frequency    String     // ONCE, MONTHLY, YEARLY
   startDate    DateTime
-  endDate      DateTime?
+  duration     Int
+  premium      Float
+  insuredValue Float
   simulationId String
   simulation   Simulation @relation(fields: [simulationId], references: [id])
 }
 
-model Insurance {
-  id           String     @id @default(cuid())
-  name         String
+model Movement {
+  id           String   @id @default(uuid())
+  type         String
+  value        Float
+  frequency    String
   startDate    DateTime
-  duration     Int        // em meses
-  premium      Float      // valor mensal
-  insuredValue Float
+  endDate      DateTime?
   simulationId String
   simulation   Simulation @relation(fields: [simulationId], references: [id])
 }
