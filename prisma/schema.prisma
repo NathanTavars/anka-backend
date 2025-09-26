@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Simulation {
+  id        String       @id @default(cuid())
+  name      String
+  startDate DateTime
+  realRate  Float        @default(0.04)
+  status    String       @default("ALIVE")
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  allocations Allocation[]
+  movements   Movement[]
+  insurances  Insurance[]
+}
+
+model Allocation {
+  id           String     @id @default(cuid())
+  type         String     // FINANCIAL ou REAL_ESTATE
+  name         String
+  value        Float
+  date         DateTime
+  financing    Financing? // Dados extras se for imobilizado financiado
+  simulationId String
+  simulation   Simulation @relation(fields: [simulationId], references: [id])
+}
+
+model Financing {
+  id           String   @id @default(cuid())
+  startDate    DateTime
+  installments Int
+  interestRate Float
+  entryValue   Float
+  allocation   Allocation @relation(fields: [allocationId], references: [id])
+  allocationId String     @unique
+}
+
+model Movement {
+  id           String     @id @default(cuid())
+  type         String     // INCOME ou EXPENSE
+  name         String
+  value        Float
+  frequency    String     // ONCE, MONTHLY, YEARLY
+  startDate    DateTime
+  endDate      DateTime?
+  simulationId String
+  simulation   Simulation @relation(fields: [simulationId], references: [id])
+}
+
+model Insurance {
+  id           String     @id @default(cuid())
+  name         String
+  startDate    DateTime
+  duration     Int        // em meses
+  premium      Float      // valor mensal
+  insuredValue Float
+  simulationId String
+  simulation   Simulation @relation(fields: [simulationId], references: [id])
+}
