@@ -1,12 +1,13 @@
-import Fastify from "fastify"
-import { simulationRoutes } from "./routes/simulations.ts"
+import fastify from "fastify";
+import cors from "@fastify/cors";
+import { simulationRoutes } from "./routes/simulations.ts";
+import { projectionRoutes } from "./routes/projections.ts";
 
-const app = Fastify({ logger: true })
+const app = fastify();
+app.register(cors, { origin: "*" });
 
-app.get("/health", async () => ({ ok: true, message: "Backend online!" }))
-
-// 🔑 REGISTRA as rotas de Simulation
-app.register(simulationRoutes, { prefix: "/simulations" })
+app.register(simulationRoutes);
+app.register(projectionRoutes);
 
 app.listen({ port: 3333, host: "0.0.0.0" })
-  .then(() => console.log("🚀 Backend running on port 3333"))
+  .then(() => console.log("🚀 Server running on http://localhost:3333"));
